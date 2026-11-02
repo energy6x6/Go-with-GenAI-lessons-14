@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -14,8 +15,8 @@ import (
 	"libratrack/internal/repository"
 )
 
-const SessionCookie = "libratrack_session"
-const CSRFCookie = "libratrack_csrf"
+const SessionCookie = "libratrack14_session"
+const CSRFCookie = "libratrack14_csrf"
 
 func (h *Handler) cookie(c *gin.Context, name, value string, age int) {
 	http.SetCookie(c.Writer, &http.Cookie{Name: name, Value: value, Path: "/", MaxAge: age,
@@ -40,7 +41,12 @@ func (h *Handler) security() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Cache-Control", "no-store")
 		c.Header("X-Content-Type-Options", "nosniff")
-		c.Header("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; base-uri 'self'; frame-ancestors 'none'; form-action 'self'")
+		wsScheme := "ws"
+		if c.Request.TLS != nil {
+			wsScheme = "wss"
+		}
+		wsURL := (&url.URL{Scheme: wsScheme, Host: c.Request.Host}).String()
+		c.Header("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' "+wsURL+"; base-uri 'self'; frame-ancestors 'none'; form-action 'self'")
 		c.Header("Referrer-Policy", "same-origin")
 		c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, 1<<20)
 		raw, _ := c.Cookie(SessionCookie)

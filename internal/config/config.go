@@ -27,7 +27,7 @@ func Load() (Config, error) {
 	if err := godotenv.Load(); err != nil && !errors.Is(err, os.ErrNotExist) {
 		return Config{}, errors.New("cannot read .env configuration")
 	}
-	c := Config{DatabaseURL: os.Getenv("DATABASE_URL"), Port: env("PORT", "8085"), ListenHost: env("LISTEN_HOST", "127.0.0.1"), MigrationsPath: os.Getenv("MIGRATIONS_PATH")}
+	c := Config{DatabaseURL: os.Getenv("DATABASE_URL"), Port: env("PORT", "8088"), ListenHost: env("LISTEN_HOST", "127.0.0.1"), MigrationsPath: os.Getenv("MIGRATIONS_PATH")}
 	port, err := strconv.Atoi(c.Port)
 	if err != nil || port < 1 || port > 65535 {
 		return c, errors.New("PORT must be between 1 and 65535")

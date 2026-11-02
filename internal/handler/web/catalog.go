@@ -14,6 +14,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"libratrack/internal/auth"
+	"libratrack/internal/chat"
 	"libratrack/internal/middleware"
 	"libratrack/internal/model"
 	"libratrack/internal/repository"
@@ -27,6 +28,7 @@ type Handler struct {
 	renderer    *assets.Renderer
 	csrfKey     []byte
 	secure      bool
+	chatHub     *chat.Hub
 }
 
 type BookRow struct {
@@ -54,6 +56,7 @@ type Page struct {
 	Categories                                                 []model.Category
 	Book                                                       model.Book
 	Form                                                       Form
+	ChatRooms                                                  []chat.Room
 	PageNumber                                                 uint64
 	PreviousURL, NextURL                                       string
 }
@@ -99,6 +102,9 @@ func (h *Handler) Register(r *gin.Engine) error {
 	pages.POST("/register", middleware.AuthRateLimit(20, time.Minute), h.RegisterUser)
 	pages.POST("/logout", h.Logout)
 	managed := pages.Group("", h.requireStaff())
+	managed.GET("/chat", h.ChatPage)
+	managed.GET("/ws/chat", h.ChatSocket)
+	managed.GET("/chat/stats", h.ChatStats)
 	managed.GET("/books/new", h.NewBook)
 	managed.GET("/books/:id/edit", h.EditBook)
 	managed.GET("/books/:id/delete", h.DeletePage)
@@ -432,6 +438,12 @@ func (h *Handler) RegisterUser(c *gin.Context) {
 	c.Redirect(303, "/login")
 }
 func (h *Handler) Logout(c *gin.Context) {
+	if h.chatHub != nil {
+		raw, _ := c.Cookie(SessionCookie)
+		if raw != "" {
+			_ = h.chatHub.DisconnectSession(c.Request.Context(), raw)
+		}
+	}
 	h.cookie(c, SessionCookie, "", -1)
 	h.cookie(c, CSRFCookie, "", -1)
 	c.Redirect(303, "/login")

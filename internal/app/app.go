@@ -6,6 +6,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	_ "libratrack/docs"
 	"libratrack/internal/auth"
+	"libratrack/internal/chat"
 	"libratrack/internal/handler"
 	webhandler "libratrack/internal/handler/web"
 	"libratrack/internal/middleware"
@@ -16,6 +17,11 @@ import (
 )
 
 func NewRouter(repos repository.Repositories, tokens *auth.Tokens) (http.Handler, error) {
+	return NewRouterWithChat(repos, tokens, nil)
+}
+
+// NewRouterWithChat uses a caller-owned hub; it starts no background goroutines.
+func NewRouterWithChat(repos repository.Repositories, tokens *auth.Tokens, hub *chat.Hub) (http.Handler, error) {
 	r := gin.New()
 	if err := r.SetTrustedProxies(nil); err != nil {
 		return nil, err
@@ -66,6 +72,7 @@ func NewRouter(repos repository.Repositories, tokens *auth.Tokens) (http.Handler
 	if err != nil {
 		return nil, err
 	}
+	web.EnableChat(hub)
 	if err := web.Register(r); err != nil {
 		return nil, err
 	}

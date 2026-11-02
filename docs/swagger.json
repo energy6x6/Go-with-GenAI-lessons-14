@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Lesson 10: HTML templates, HTMX, cookie authentication and embedded assets.",
+        "description": "Library catalogue, authenticated staff chat and embedded web assets.",
         "title": "LibraTrack Library API",
         "contact": {},
         "version": "4.0"
