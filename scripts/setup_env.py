@@ -15,7 +15,7 @@ else:
     text = text.replace("POSTGRES_PASSWORD=\n", f"POSTGRES_PASSWORD={admin_password}\n")
     text = text.replace("APP_DB_PASSWORD=\n", f"APP_DB_PASSWORD={app_password}\n")
     text = text.replace("JWT_SECRET=\n", f"JWT_SECRET={secrets.token_urlsafe(48)}\n")
-    test_url = f"postgres://libratrack:{quote(app_password, safe='')}@127.0.0.1:5440/libratrack10_test?sslmode=disable"
+    test_url = f"postgres://libratrack:{quote(app_password, safe='')}@127.0.0.1:5444/libratrack14_test?sslmode=disable"
     text = text.replace("TEST_DATABASE_URL=\n", f"TEST_DATABASE_URL={test_url}\n")
     with target.open("x", encoding="utf-8") as file:
         target.chmod(0o600)

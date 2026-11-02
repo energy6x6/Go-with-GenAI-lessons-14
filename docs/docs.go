@@ -1644,7 +1644,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
 	Title:            "LibraTrack Library API",
-	Description:      "Lesson 10: HTML templates, HTMX, cookie authentication and embedded assets.",
+	Description:      "Library catalogue, authenticated staff chat and embedded web assets.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

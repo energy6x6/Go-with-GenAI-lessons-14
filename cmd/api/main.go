@@ -13,13 +13,14 @@ import (
 
 	"libratrack/internal/app"
 	"libratrack/internal/auth"
+	"libratrack/internal/chat"
 	"libratrack/internal/config"
 	"libratrack/internal/repository"
 )
 
 // @title LibraTrack Library API
 // @version 4.0
-// @description Lesson 10: HTML templates, HTMX, cookie authentication and embedded assets.
+// @description Library catalogue, authenticated staff chat and embedded web assets.
 // @BasePath /api/v1
 // @securityDefinitions.apikey BearerAuth
 // @in header
@@ -48,15 +49,20 @@ func main() {
 	if err := repository.Migrate(c.DatabaseURL, c.MigrationsPath); err != nil {
 		log.Fatalf("cannot apply SQL migrations (%T)", err)
 	}
-	router, err := app.NewRouter(repository.NewRepositories(db), tokens)
+	hub := chat.New(chat.Options{})
+	defer hub.Close()
+	router, err := app.NewRouterWithChat(repository.NewRepositories(db), tokens, hub)
 	if err != nil {
 		log.Fatalf("cannot initialize application: %v", err)
 	}
 	server := &http.Server{Addr: net.JoinHostPort(c.ListenHost, c.Port), Handler: router, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 15 * time.Second, WriteTimeout: 30 * time.Second, IdleTimeout: 60 * time.Second}
 	signals, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
+	shutdownDone := make(chan struct{})
 	go func() {
+		defer close(shutdownDone)
 		<-signals.Done()
+		hub.Close() // HTTP Shutdown alone does not close hijacked WebSocket connections.
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 		if err := server.Shutdown(ctx); err != nil {
@@ -67,4 +73,5 @@ func main() {
 	if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatal("HTTP server failed")
 	}
+	<-shutdownDone
 }

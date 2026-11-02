@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -18,7 +20,27 @@ import (
 )
 
 func main() {
-	if _, err := os.Stat(".demo-accounts.txt"); err == nil {
+	artifactDir := os.Getenv("ARTIFACTS_DIR")
+	if artifactDir == "" {
+		artifactDir = "../lesson14-artifacts"
+	}
+	absoluteDir, err := filepath.Abs(artifactDir)
+	if err != nil {
+		log.Fatal("invalid artifact directory")
+	}
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+	relative, err := filepath.Rel(cwd, absoluteDir)
+	if err != nil || (relative != ".." && !strings.HasPrefix(relative, ".."+string(os.PathSeparator))) {
+		log.Fatal("ARTIFACTS_DIR must be outside the repository")
+	}
+	if err := os.MkdirAll(absoluteDir, 0700); err != nil {
+		log.Fatal(err)
+	}
+	accountFile := filepath.Join(absoluteDir, ".demo-accounts.txt")
+	if _, err := os.Stat(accountFile); err == nil {
 		log.Print(".demo-accounts.txt already exists; kept unchanged")
 		return
 	}
@@ -38,9 +60,9 @@ func main() {
 		log.Fatal("cannot apply migrations")
 	}
 	users := repository.NewUserRepository(db)
-	text := "Lesson 10 — local demo accounts. Keep this file private.\n\n"
-	for _, role := range []string{model.RoleReader, model.RoleLibrarian, model.RoleAdmin} {
-		email := role + "10@example.com"
+	text := "Lesson 14 — local demo accounts. Keep this file private.\n\n"
+	for _, role := range []string{model.RoleReader, model.RoleLibrarian, model.RoleAdmin, "colleague"} {
+		email := role + "14@example.com"
 		if _, err := users.FindByEmail(ctx, email); err == nil {
 			log.Fatal("demo account already exists; existing passwords were not changed")
 		} else if err != repository.ErrNotFound {
@@ -49,7 +71,7 @@ func main() {
 	}
 	err = db.WithContext(ctx).Transaction(func(txDB *gorm.DB) error {
 		users = repository.NewUserRepository(txDB)
-		for _, role := range []string{model.RoleReader, model.RoleLibrarian, model.RoleAdmin} {
+		for _, role := range []string{model.RoleReader, model.RoleLibrarian, model.RoleAdmin, "colleague"} {
 			var random [12]byte
 			if _, err := rand.Read(random[:]); err != nil {
 				return err
@@ -59,14 +81,18 @@ func main() {
 			if err != nil {
 				return err
 			}
+			actualRole := role
+			if role == "colleague" {
+				actualRole = model.RoleLibrarian
+			}
 			name := "Demo " + role
-			user := model.User{Email: role + "10@example.com", Name: &name, Role: role, PasswordHash: hash}
+			user := model.User{Email: role + "14@example.com", Name: &name, Role: actualRole, PasswordHash: hash}
 			if err := users.Create(ctx, &user); err != nil {
 				return err
 			}
 			text += fmt.Sprintf("Role: %s\nEmail: %s\nPassword: %s\n\n", role, user.Email, password)
 		}
-		file, err := os.OpenFile(".demo-accounts.txt", os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
+		file, err := os.OpenFile(accountFile, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
 		if err != nil {
 			return err
 		}
@@ -79,5 +105,5 @@ func main() {
 	if err != nil {
 		log.Fatal("could not create demo accounts; inspect database and private credential file before retrying")
 	}
-	log.Print("Created three demo accounts; credentials saved privately in .demo-accounts.txt")
+	log.Print("Created four demo accounts; credentials saved privately outside the repository")
 }

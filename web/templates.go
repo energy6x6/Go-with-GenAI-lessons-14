@@ -21,7 +21,7 @@ func NewRenderer() (*Renderer, error) {
 		return nil, err
 	}
 	r := &Renderer{pages: make(map[string]*template.Template), fragments: base}
-	for _, page := range []string{"catalog", "book_form", "book_detail", "login", "register", "error"} {
+	for _, page := range []string{"catalog", "book_form", "book_detail", "login", "register", "error", "chat"} {
 		t, err := base.Clone()
 		if err != nil {
 			return nil, err

@@ -1,0 +1,9 @@
+{{define "content"}}
+<section id="chat" class="chat" data-user-id="{{.User.ID}}">
+<div class="chat-heading"><div><p class="eyebrow">LIBRATRACK · КОМАНДА</p><h1>Чат персоналу</h1><p class="muted">Обговорюйте роботу бібліотеки разом із колегами.</p></div><span id="chat-status" class="chat-status" role="status">Відключено</span></div>
+<div class="chat-workspace">
+<aside class="chat-sidebar"><h2>Кімнати</h2><div class="chat-rooms" role="group" aria-label="Кімнати чату">{{range .ChatRooms}}<button type="button" class="room-button secondary" data-room="{{.ID}}" aria-pressed="false">{{.Name}}</button>{{end}}</div><p class="muted">Повідомлення бачать лише підключені учасники обраної кімнати.</p><p class="chat-count">Підключень у кімнаті: <strong id="chat-online">0</strong></p><button id="chat-toggle" type="button" class="button secondary">Підключитися</button></aside>
+<div class="chat-main"><div class="chat-room-heading"><h2 id="chat-room-name">Загальна</h2><span class="muted">Наживо</span></div><ol id="chat-messages" class="chat-messages" aria-label="Повідомлення" aria-live="polite" aria-relevant="additions"></ol><p id="chat-empty" class="muted chat-empty">Тут з’являться нові повідомлення вашої команди.</p><p id="chat-error" class="error" role="alert" hidden></p><form id="chat-form" class="chat-compose"><label for="chat-text">Повідомлення</label><textarea id="chat-text" rows="2" maxlength="4000" placeholder="Напишіть колегам…" required disabled></textarea><div class="chat-compose-footer"><small class="muted">До 2000 символів · Історія не зберігається</small><button id="chat-send" class="button" disabled>Надіслати</button></div></form></div>
+</div><noscript><p class="error">Для чату потрібно увімкнути JavaScript.</p></noscript>
+</section><script src="/static/js/chat.js" defer></script>
+{{end}}
