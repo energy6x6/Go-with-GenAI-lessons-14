@@ -37,7 +37,6 @@ jobs:
       JWT_SECRET: ci-ephemeral-signing-secret-not-for-deployment
       POSTGRES_PASSWORD: ci-compose-validation-only
       APP_DB_PASSWORD: ci-compose-validation-only
-      ARTIFACTS_DIR: ${{ runner.temp }}/lesson14-evidence
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -51,6 +50,8 @@ jobs:
           CREATE DATABASE libratrack14_test OWNER libratrack;
           SQL
       - name: Build vet and race tests
+        env:
+          ARTIFACTS_DIR: ${{ runner.temp }}/lesson14-evidence
         run: |
           bash scripts/check.sh
           docker compose config -q
