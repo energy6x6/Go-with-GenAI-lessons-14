@@ -1,0 +1,7 @@
+{{define "book_row"}}<tr id="book-{{.Book.ID}}"><td><a class="book-title" href="/books/{{.Book.ID}}">{{.Book.Title}}</a><span class="subtext">ISBN {{.Book.ISBN}}</span></td>
+<td>{{range $i,$a := .Book.Authors}}{{if $i}}, {{end}}{{$a.FullName}}{{end}}</td><td><span class="tag">{{.Book.Category.Name}}</span></td>
+<td>{{if gt .Book.AvailableCopies 0}}<span class="availability available">Доступна</span>{{else}}<span class="availability unavailable">Недоступна</span>{{end}}<span class="subtext">{{.Book.AvailableCopies}} із {{.Book.TotalCopies}} примірників</span></td>
+<td class="actions"><a href="/books/{{.Book.ID}}">Деталі</a>{{if .CanManage}}<a href="/books/{{.Book.ID}}/edit">Редагувати</a>
+<button type="button" class="danger-link htmx-delete" hx-delete="/web/books/{{.Book.ID}}" hx-target="closest tr" hx-swap="outerHTML" hx-confirm="Delete this book?">Видалити</button>
+<noscript><a href="/books/{{.Book.ID}}/delete">Видалити</a></noscript>{{end}}</td></tr>{{end}}
+{{define "book_rows"}}{{range .Rows}}{{template "book_row" .}}{{else}}<tr class="empty"><td colspan="5">Книг не знайдено. Спробуйте інший запит.</td></tr>{{end}}{{end}}

@@ -1,0 +1,9 @@
+.git
+.env
+.env.*
+.demo-accounts.txt
+bin
+*.log
+cover.out
+test-results.jsonl
+test-summary.txt

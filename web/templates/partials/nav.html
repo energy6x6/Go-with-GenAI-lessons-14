@@ -1,0 +1,5 @@
+{{define "nav"}}<header class="header"><nav class="container nav" aria-label="Головна навігація">
+<a class="brand" href="/catalog"><span class="logo" aria-hidden="true">L</span> LibraTrack</a>
+<a href="/catalog">Каталог</a><div class="account">{{if .User}}<span class="role">{{.User.Role}}</span><span>{{.User.Email}}</span>
+<form method="post" action="/logout"><input type="hidden" name="csrf_token" value="{{.CSRF}}"><button class="button secondary" type="submit">Вийти</button></form>
+{{else}}<a href="/login">Увійти</a><a class="button secondary" href="/register">Реєстрація</a>{{end}}</div></nav></header>{{end}}

@@ -1,0 +1,9 @@
+{{define "layout"}}<!DOCTYPE html>
+<html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{.Title}} · LibraTrack</title><link rel="stylesheet" href="/static/css/style.css">
+<script src="/static/js/htmx.min.js" defer></script><script src="/static/js/app.js" defer></script></head>
+<body hx-headers='{"X-CSRF-Token":"{{.CSRF}}"}'>
+{{template "nav" .}}<main class="container"><div id="feedback" role="alert" aria-live="polite"></div>
+{{if .Notice}}<p class="notice" role="status">{{.Notice}}</p>{{end}}
+{{block "content" .}}{{end}}</main>
+<footer class="container footer">LibraTrack · Бібліотечний каталог · Go + HTMX</footer></body></html>{{end}}

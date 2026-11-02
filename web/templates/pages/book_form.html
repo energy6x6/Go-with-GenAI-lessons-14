@@ -1,0 +1,13 @@
+{{define "content"}}<a href="/catalog">← До каталогу</a><h1>{{.Title}}</h1><section class="panel form-panel">
+{{if .Error}}{{template "error_fragment" .}}{{end}}
+{{if .Form.Delete}}<p>Видалити книгу <strong>{{.Form.Title}}</strong> (ISBN {{.Form.ISBN}})?</p><p class="muted">Видалення книги з історією видач буде відхилено.</p>
+<form method="post" action="/web/books/{{.Form.ID}}/delete"><input type="hidden" name="csrf_token" value="{{.CSRF}}"><button class="button danger">Видалити книгу</button> <a href="/catalog">Скасувати</a></form>
+{{else}}<form method="post" action="{{if .Form.ID}}/web/books/{{.Form.ID}}{{else}}/web/books{{end}}" class="stack">
+<input type="hidden" name="csrf_token" value="{{.CSRF}}">
+<div class="field"><label for="title">Назва книги *</label><input id="title" name="title" value="{{.Form.Title}}" required maxlength="500"></div>
+<div class="form-grid"><div class="field"><label for="isbn">ISBN *</label><input id="isbn" name="isbn" value="{{.Form.ISBN}}" required maxlength="32"></div>
+<div class="field"><label for="year">Рік видання</label><input id="year" name="published_year" type="number" min="0" value="{{.Form.PublishedYear}}"></div></div>
+<div class="field"><label for="category_id">Категорія *</label><select id="category_id" name="category_id" required><option value="">Оберіть категорію</option>{{range .Form.Categories}}<option value="{{.ID}}" {{if .Selected}}selected{{end}}>{{.Label}}</option>{{end}}</select></div>
+<fieldset><legend>Автори *</legend><div class="author-options">{{range .Form.Authors}}<label class="checkbox"><input type="checkbox" name="author_ids" value="{{.ID}}" {{if .Selected}}checked{{end}}>{{.Label}}</label>{{end}}</div></fieldset>
+<div class="field"><label for="description">Опис</label><textarea id="description" name="description" rows="4" maxlength="10000">{{.Form.Description}}</textarea></div>
+<div class="form-actions"><button class="button">Зберегти книгу</button><a href="/catalog">Скасувати</a></div></form>{{end}}</section>{{end}}
